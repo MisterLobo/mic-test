@@ -1,18 +1,19 @@
 <div class="text-align:center" width="100%">
   <p>Permission {{ requestStatus }}</p>
-  <button mat-icon-button *ngIf="requestStatus !== 'granted'" (click)="requestPermission()"><mat-icon>mic</mat-icon></button>
-  <button mat-icon-button *ngIf="requestStatus === 'granted' && recorderState === 'inactive'" (click)="startRecording()" color="error"><mat-icon>fiber_manual_record</mat-icon></button>
-  <button mat-icon-button *ngIf="recorderState === 'paused'" (click)="resumeRecording()"><mat-icon>play_arrow</mat-icon></button>
-  <button mat-icon-button *ngIf="recorderState === 'recording'" (click)="pauseRecording()"><mat-icon>pause</mat-icon></button>
-  <button mat-icon-button *ngIf="recorderState === 'recording'" (click)="stopRecording()"><mat-icon>stop</mat-icon></button>
-  
-  <p>Time {{ runtime }}</p>
-  <p><mat-slider #timeLimit thumbLabel min="1" max="35" step="1" value="10"></mat-slider></p>
+  <button mat-button *ngIf="requestStatus !== 'granted'" (click)="requestPermission()"><mat-icon>mic</mat-icon> Request Permission</button>
+  <button mat-button *ngIf="requestStatus === 'granted'" [disabled]="recorderState !== 'inactive'" (click)="startRecording()" color="error"><mat-icon>fiber_manual_record</mat-icon> Start</button>
+  <button mat-button [disabled]="recorderState !== 'paused'" (click)="resumeRecording()"><mat-icon>play_arrow</mat-icon> Resume</button>
+  <button mat-button [disabled]="recorderState !== 'recording'" (click)="pauseRecording()"><mat-icon>pause</mat-icon> Pause</button>
+  <button mat-button [disabled]="recorderState !== 'recording'" (click)="stopRecording()" color="error"><mat-icon>stop</mat-icon> Stop</button>
+  <p><mat-slider min="5" max="60" step="1" [(value)]="recordLimit" thumbLabel [disabled]="recorderState !== 'inactive'"></mat-slider></p>
+  <p>Time Limit: {{ recordLimit }} seconds</p>
+  <p>Run time: {{ aRuntime | async }} seconds</p>
+  <!-- <p><mat-slider #timeLimit thumbLabel min="1" max="35" step="1" value="10"></mat-slider></p> -->
 </div>
 <audio #player id="player" controls>
   Your browser does not support the <code>audio</code> element.
 </audio>
 <div class="text-align:center" width="100%">
   <!-- <button mat-icon-button><mat-icon>save</mat-icon></button> -->
-  <button mat-icon-button (click)="deleteRecording()"><mat-icon>delete</mat-icon></button>
+  <button *ngIf="completed" mat-button (click)="deleteRecording()" color="error"><mat-icon>delete</mat-icon> Delete</button>
 </div>

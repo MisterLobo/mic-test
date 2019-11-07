@@ -8,7 +8,8 @@ import {
   MatCommonModule,
   MatIconModule,
   MatListModule,
-  MatSliderModule
+  MatSliderModule,
+  MatProgressBarModule,
 } from '@angular/material';
 
 import { AppComponent } from './app.component';
@@ -26,7 +27,8 @@ import { AudioRecorderComponent } from './audio-recorder/audio-recorder.componen
     MatButtonModule,
     MatIconModule,
     MatListModule,
-    MatSliderModule
+    MatSliderModule,
+    MatProgressBarModule,
   ],
   providers: [],
   bootstrap: [AppComponent],

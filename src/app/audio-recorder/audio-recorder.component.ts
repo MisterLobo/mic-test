@@ -1,5 +1,7 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { interval, Observable, Subscription }  from 'rxjs';
+import { interval, timer, Observable, Subscription, ObservableLike }  from 'rxjs';
+import { map, take } from 'rxjs/operators';
+
 declare const MediaRecorder: any;
 
 @Component({
@@ -16,12 +18,14 @@ export class AudioRecorderComponent implements OnInit {
   @ViewChild('player', {static: false}) player;
   @ViewChild('timeLimit', {static: false}) timeLimit;
   _mediaRecorder: any;
-  recordLimit: 30;
+  recordLimit = 30;
   startTime: Date;
   endTime: Date;
   timer: Observable<number>;
   runtime: number;
   timerSub: Subscription;
+  completed = false;
+  aRuntime: Observable<number>;
 
   constructor() {
     navigator.permissions.query({name:'microphone'}).then((result) => {
@@ -54,11 +58,12 @@ export class AudioRecorderComponent implements OnInit {
     this._mediaRecorder.ondataavailable = (d) => { this.dataHandler(d) };
     console.log('success');
     if (window.URL) {
-      this.player.srcObject = stream;
+      // this.player.srcObject = stream;
     } else {
-      this.player.src = stream;
+      // this.player.src = stream;
     }
     this.requestStatus = 'granted';
+    this.recorderState = 'inactive';
     console.log(this.player);
   };
 
@@ -72,11 +77,6 @@ export class AudioRecorderComponent implements OnInit {
     if (e.data.size > 0) {
       console.log('data captured');
       this.recordedChunks.push(e.data);
-      const src = URL.createObjectURL(new Blob(this.recordedChunks, {type : 'audio/wav'}));
-      console.log(src);
-      const audio = new Audio(src);
-      audio.play();
-      this.player.nativeElement.src = src;
     }
   }
 
@@ -84,12 +84,32 @@ export class AudioRecorderComponent implements OnInit {
     this._mediaRecorder.start();
   }
   startHandler() {
+    console.log(this.recordLimit);
     console.log('started');
     this.recorderState = 'recording';
     this.timer = interval(1000);
-    this.timerSub = this.timer.subscribe(x => {
-      this.runtime = x;
-    });
+    this.aRuntime = interval(1000)
+    .pipe(map(x => x + 1)) // to start from 1 instead of 0
+    //.pipe(map(x => {}))
+    .pipe(take(this.recordLimit));
+    this.timerSub = this.timer.subscribe(x => { this.increment(x); });
+    console.log(this.timerSub);
+  }
+
+  increment(inc) {
+    console.log(inc);
+    let ret = 0;
+    //this.runtime += inc <= ;
+    if (inc <= this.recordLimit) {
+      ret += 1;
+      this.runtime += 1;
+    }
+    else {
+      this.runtime += 0;
+      ret += 0;
+      this._mediaRecorder.stop();
+    }
+    console.log(this.runtime);
   }
 
   stopRecording() {
@@ -99,6 +119,10 @@ export class AudioRecorderComponent implements OnInit {
     console.log('stopped');
     this.timerSub.unsubscribe();
     this.recorderState = 'inactive';
+    this.completed = true;
+    const src = URL.createObjectURL(new Blob(this.recordedChunks, {type : 'audio/ogg; codecs=opus'}));
+    const audio = new Audio(src);
+    this.player.nativeElement.src = src;
   }
 
   pauseRecording() {
