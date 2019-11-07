@@ -6,23 +6,13 @@
   <button mat-icon-button *ngIf="recorderState === 'recording'" (click)="pauseRecording()"><mat-icon>pause</mat-icon></button>
   <button mat-icon-button *ngIf="recorderState === 'recording'" (click)="stopRecording()"><mat-icon>stop</mat-icon></button>
   
-  <p>Time {{ recordTime }}</p>
-  <p><mat-slider></mat-slider></p>
-  <!-- <mat-list>
-    <h3 mat-subheader>Recordings</h3>
-    <mat-list-item *ngFor="let recording of recordings">
-      <mat-icon mat-list-icon>mic</mat-icon>
-      <h4 mat-line>{{recording.name}}</h4>
-      <p mat-line> {{recording.created | date}} </p>
-      <p mat-line> {{recording.duration}} </p>
-      <p mat-line> {{recording.sizeKb}} </p>
-    </mat-list-item>
-  </mat-list> -->
+  <p>Time {{ runtime }}</p>
+  <p><mat-slider #timeLimit thumbLabel min="1" max="35" step="1" value="10"></mat-slider></p>
 </div>
 <audio #player id="player" controls>
   Your browser does not support the <code>audio</code> element.
 </audio>
 <div class="text-align:center" width="100%">
-  <button mat-icon-button><mat-icon>save</mat-icon></button>
+  <!-- <button mat-icon-button><mat-icon>save</mat-icon></button> -->
   <button mat-icon-button (click)="deleteRecording()"><mat-icon>delete</mat-icon></button>
 </div>

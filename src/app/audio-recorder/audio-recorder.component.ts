@@ -1,4 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { interval, Observable, Subscription }  from 'rxjs';
+declare const MediaRecorder: any;
 
 @Component({
   selector: 'app-audio-recorder',
@@ -12,7 +14,14 @@ export class AudioRecorderComponent implements OnInit {
   recordedChunks = [];
   recordTime = 0;
   @ViewChild('player', {static: false}) player;
+  @ViewChild('timeLimit', {static: false}) timeLimit;
   _mediaRecorder: any;
+  recordLimit: 30;
+  startTime: Date;
+  endTime: Date;
+  timer: Observable<number>;
+  runtime: number;
+  timerSub: Subscription;
 
   constructor() {
     navigator.permissions.query({name:'microphone'}).then((result) => {
@@ -31,7 +40,7 @@ export class AudioRecorderComponent implements OnInit {
   }
 
   ngOnInit() {
-    
+    this.runtime = 0;
   }
 
   handleSuccess(stream) {
@@ -68,7 +77,6 @@ export class AudioRecorderComponent implements OnInit {
       const audio = new Audio(src);
       audio.play();
       this.player.nativeElement.src = src;
-      this.recordTime = this.player.nativeElement.duration;
     }
   }
 
@@ -78,14 +86,18 @@ export class AudioRecorderComponent implements OnInit {
   startHandler() {
     console.log('started');
     this.recorderState = 'recording';
+    this.timer = interval(1000);
+    this.timerSub = this.timer.subscribe(x => {
+      this.runtime = x;
+    });
   }
 
   stopRecording() {
     this._mediaRecorder.stop();
-    
   }
   stopHandler() {
     console.log('stopped');
+    this.timerSub.unsubscribe();
     this.recorderState = 'inactive';
   }
 
@@ -110,6 +122,7 @@ export class AudioRecorderComponent implements OnInit {
   }
   deleteRecording() {
     this.recordedChunks = [];
+    this.player.nativeElement.src = null;
   }
 
   warningHandler(w) {
