@@ -1,13 +1,15 @@
 <div class="text-align:center" width="100%">
   <p>Permission {{ requestStatus }}</p>
+  <p>{{ aRecorderState | async }}</p>
+  <p>{{ subState }}</p>
   <button mat-button *ngIf="requestStatus !== 'granted'" (click)="requestPermission()"><mat-icon>mic</mat-icon> Request Permission</button>
   <button mat-button *ngIf="requestStatus === 'granted'" [disabled]="recorderState !== 'inactive'" (click)="startRecording()" color="error"><mat-icon>fiber_manual_record</mat-icon> Start</button>
   <button mat-button [disabled]="recorderState !== 'paused'" (click)="resumeRecording()"><mat-icon>play_arrow</mat-icon> Resume</button>
-  <button mat-button [disabled]="recorderState !== 'recording'" (click)="pauseRecording()"><mat-icon>pause</mat-icon> Pause</button>
-  <button mat-button [disabled]="recorderState !== 'recording'" (click)="stopRecording()" color="error"><mat-icon>stop</mat-icon> Stop</button>
+  <button mat-button [disabled]="recorderState !== 'recording' || completed"  (click)="pauseRecording()"><mat-icon>pause</mat-icon> Pause</button>
+  <button mat-button [disabled]="recorderState !== 'recording' || completed" (click)="stopRecording()" color="error"><mat-icon>stop</mat-icon> Stop</button>
   <p><mat-slider min="5" max="60" step="1" [(value)]="recordLimit" thumbLabel [disabled]="recorderState !== 'inactive'"></mat-slider></p>
   <p>Time Limit: {{ recordLimit }} seconds</p>
-  <p>Run time: {{ aRuntime | async }} seconds</p>
+  <p>Run time: {{ runtime }} seconds</p>
 </div>
 <audio #player id="player" controls>
   Your browser does not support the <code>audio</code> element.
