@@ -8,12 +8,11 @@
   <p><mat-slider min="5" max="60" step="1" [(value)]="recordLimit" thumbLabel [disabled]="recorderState !== 'inactive'"></mat-slider></p>
   <p>Time Limit: {{ recordLimit }} seconds</p>
   <p>Run time: {{ aRuntime | async }} seconds</p>
-  <!-- <p><mat-slider #timeLimit thumbLabel min="1" max="35" step="1" value="10"></mat-slider></p> -->
 </div>
 <audio #player id="player" controls>
   Your browser does not support the <code>audio</code> element.
 </audio>
 <div class="text-align:center" width="100%">
   <!-- <button mat-icon-button><mat-icon>save</mat-icon></button> -->
-  <button *ngIf="completed" mat-button (click)="deleteRecording()" color="error"><mat-icon>delete</mat-icon> Delete</button>
+  <button *ngIf="completed && src" mat-button (click)="deleteRecording()" color="error"><mat-icon>delete</mat-icon> Delete</button>
 </div>

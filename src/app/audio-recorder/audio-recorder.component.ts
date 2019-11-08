@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { interval, timer, Observable, Subscription, ObservableLike }  from 'rxjs';
-import { map, take } from 'rxjs/operators';
+import { map, take, finalize } from 'rxjs/operators';
 
 declare const MediaRecorder: any;
 
@@ -26,6 +26,7 @@ export class AudioRecorderComponent implements OnInit {
   timerSub: Subscription;
   completed = false;
   aRuntime: Observable<number>;
+  src = null;
 
   constructor() {
     navigator.permissions.query({name:'microphone'}).then((result) => {
@@ -84,32 +85,18 @@ export class AudioRecorderComponent implements OnInit {
     this._mediaRecorder.start();
   }
   startHandler() {
-    console.log(this.recordLimit);
     console.log('started');
     this.recorderState = 'recording';
     this.timer = interval(1000);
     this.aRuntime = interval(1000)
-    .pipe(map(x => x + 1)) // to start from 1 instead of 0
-    //.pipe(map(x => {}))
-    .pipe(take(this.recordLimit));
-    this.timerSub = this.timer.subscribe(x => { this.increment(x); });
-    console.log(this.timerSub);
-  }
-
-  increment(inc) {
-    console.log(inc);
-    let ret = 0;
-    //this.runtime += inc <= ;
-    if (inc <= this.recordLimit) {
-      ret += 1;
-      this.runtime += 1;
-    }
-    else {
-      this.runtime += 0;
-      ret += 0;
-      this._mediaRecorder.stop();
-    }
-    console.log(this.runtime);
+      .pipe(map(x => x + 1))
+      .pipe(
+        take(this.recordLimit),
+        finalize(() => {
+          console.log('Recording finished');
+          this.stopRecording();
+        }
+      ));
   }
 
   stopRecording() {
@@ -117,11 +104,12 @@ export class AudioRecorderComponent implements OnInit {
   }
   stopHandler() {
     console.log('stopped');
-    this.timerSub.unsubscribe();
+    // this.timerSub.unsubscribe();
     this.recorderState = 'inactive';
     this.completed = true;
     const src = URL.createObjectURL(new Blob(this.recordedChunks, {type : 'audio/ogg; codecs=opus'}));
-    const audio = new Audio(src);
+    // const audio = new Audio(src);
+    this.src = src;
     this.player.nativeElement.src = src;
   }
 
@@ -147,6 +135,7 @@ export class AudioRecorderComponent implements OnInit {
   deleteRecording() {
     this.recordedChunks = [];
     this.player.nativeElement.src = null;
+    this.src = null;
   }
 
   warningHandler(w) {
